@@ -3,16 +3,20 @@ package facerecognition;
 import gnu.io.NoSuchPortException;
 import java.util.concurrent.TimeUnit;
 import model.ArduinoConnection;
-import model.DatabaseConnection;
-import gnu.io.RXTXVersion;
+import model.MongoConnection;
+import model.SQLConnection;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FaceRecognition {
-    public static void main(String[] args) throws InterruptedException, NoSuchPortException, IOException {
-        DatabaseConnection db = new DatabaseConnection();
+    public static void main(String[] args) throws InterruptedException, NoSuchPortException, IOException, ClassNotFoundException, SQLException {
+        MongoConnection db = new MongoConnection();
         db.getUser();
+        
+        SQLConnection sqlDatabase = new SQLConnection();
+        sqlDatabase.getUsers();
         
         new Thread(new ArduinoInterrupt()).start();
     } 
