@@ -1,8 +1,10 @@
 package model;
 
 import gnu.io.CommPortIdentifier;
+import gnu.io.NoSuchPortException;
 import gnu.io.SerialPort;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Enumeration;
@@ -30,7 +32,8 @@ public class ArduinoConnection {
     public boolean getConectionState(){
         return conectionState;
     }
-    public void initializeConection(){
+    public void initializeConection() throws NoSuchPortException{
+        System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
         CommPortIdentifier portID=null;
         Enumeration portEnum=CommPortIdentifier.getPortIdentifiers();
         
@@ -69,12 +72,19 @@ public class ArduinoConnection {
     }
     
     public String receiveData(){
-        String result = "";
+        String result;
         try{
             result = input.readLine();
         } catch(Exception e){
-            System.out.println(e);
+            //System.out.println(e);
+            result = "no";
+            
         }
         return result;
+    }
+    public void close() throws IOException {
+        output.close();
+        input.close();
+        serialPort.close();
     }
 }
