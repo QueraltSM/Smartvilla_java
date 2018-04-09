@@ -13,21 +13,20 @@ public class MongoConnection {
     private final MongoClientURI mongoURI;
     private final MongoClient mongoClient;
     private final MongoDatabase db;
-    private final MongoCollection coll;
+    private final MongoCollection userColl;
+    private final MongoCollection messageColl;
     
     public MongoConnection() {
         mongoURI = new MongoClientURI("mongodb://admin:admin@ds233238.mlab.com:33238/recognition");
         mongoClient = new MongoClient(mongoURI);
         db = mongoClient.getDatabase("recognition");
-        coll = db.getCollection("users");
+        userColl = db.getCollection("users");
+        messageColl = db.getCollection("messages");
     }
     
     public Person[] getUser() {
-        MongoCursor<Document> cursor = coll.find().iterator();
-        Person[] user = new Person[(int) coll.count()];
-        
-        System.out.println("length: " + user.length);
-        //Person user = new Person();
+        MongoCursor<Document> cursor = userColl.find().iterator();
+        Person[] user = new Person[(int) userColl.count()];
         int i = 0;
         while (cursor.hasNext()) {
             Document doc = cursor.next();
@@ -42,8 +41,29 @@ public class MongoConnection {
         return user;
     }
     
+    public Message[] getMessages() {
+        MongoCursor<Document> cursor = messageColl.find().iterator();
+        Message[] message = new Message[(int) messageColl.count()];
+        
+        int i = 0;
+        while (cursor.hasNext()) {
+            Document doc = cursor.next();
+            Message actualMessage = new Message();
+            doc.keySet().forEach((key) -> {
+                actualMessage.setMessage(key, doc.get(key));
+            });
+            message[i] = actualMessage;
+            i++;
+        }
+        return message;
+    }
+    
     public long getUserCount() {
-        return coll.count();
+        return userColl.count();
+    }
+    
+    public long getMessageCount() {
+        return messageColl.count();
     }
     
 }

@@ -13,37 +13,51 @@ import model.Person;
 import model.PythonConnection;
 
 public class FaceRecognition {
+    private static MongoConnection db;
+    private static PythonConnection python;
+    private static SQLConnection sqlDatabase;
+    private static boolean update;
+    
+    
     public static void main(String[] args) throws InterruptedException, NoSuchPortException, IOException, ClassNotFoundException, SQLException {
-        MongoConnection db = new MongoConnection();
-        PythonConnection python = new PythonConnection(10000);
-        SQLConnection sqlDatabase = new SQLConnection();
-        Integer py = 0;
-        sqlDatabase.deleteAll();
+        db = new MongoConnection();
+        python = new PythonConnection(10000);
+        sqlDatabase = new SQLConnection();
+        String name;
         
+        Runnable mongoThread = new MongoThread(db, sqlDatabase, python);
+        new Thread(mongoThread).start();
         
-        Person[] user = db.getUser();
-        for (Person user1 : user) {
-            sqlDatabase.setUser(user1);
-        }
-        
-        //new Thread(new ArduinoInterrupt()).start();
         while (true) {
-            try {
-                ExecutorService service = Executors.newFixedThreadPool(1);
-                Future<Integer> result = service.submit(new ArduinoThread());
-                if (result.get() == 1) {
-                    py = 1;
-                }
-                service.shutdown();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-            if (py == 1) {
-                python.send("start");
-                String res = python.receive();
-                System.out.println(res);
-            }
-            Thread.sleep(10000);
+            name = recognize();
         }
-    } 
+    }
+    
+    public static String recognize() throws InterruptedException, IOException {
+        int py = 0;
+        String res = "";
+        try {
+            ExecutorService service = Executors.newFixedThreadPool(1);
+            Future<Integer> result = service.submit(new ArduinoThread());
+            if (result.get() == 1) {
+                py = 1;
+            }
+            service.shutdown();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (py == 1) {
+            /*if (update) {   
+                python.send("start");
+                update = false;
+            } else {
+                python.send("continue");
+            }*/
+            python.send("continue");
+            res = python.receive();
+            System.out.println(res);
+        }
+        Thread.sleep(10000);
+        return res;
+    }
 }

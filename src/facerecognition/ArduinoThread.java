@@ -31,10 +31,6 @@ public class ArduinoThread implements Callable<Integer> {
             response = connect.receiveData();
         }
         result = 1;
-        //System.out.println(response);
-        //if (response.equals("ok")) result = 1;
-        //System.out.println("Ya esta");
-
         try {
             connect.close();
         } catch (IOException ex) {

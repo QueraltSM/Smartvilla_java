@@ -30,9 +30,36 @@ public class SQLConnection {
         + person.getPassword() + "', '" + person.getUsername() + "', '" + person.getSurname() + "', '" + person.getLastVisit() + "');");
     }
     
-    public void deleteAll() throws SQLException {
+    public void setMessages(Message message) throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("INSERT INTO MESSAGES (sender, receiver, message) " + "VALUES ('" + message.getFrom() + "', '"
+        + message.getTo() + "', '" + message.getMessage() + "');");
+    }
+    
+    public void deleteUsers() throws SQLException {
         Statement statement = connection.createStatement();
         statement.executeUpdate("DELETE FROM USERS");
+    }
+    
+    public void updateUsers(MongoConnection db) throws SQLException {
+        this.deleteUsers();
+        Person[] user = db.getUser();
+        for (Person user1 : user) {
+            this.setUser(user1);
+        }
+    }
+    
+    public void deleteMessages() throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("DELETE FROM USERS");
+    }
+    
+    public void updateMessages(MongoConnection db) throws SQLException {
+        this.deleteMessages();
+        Message[] message = db.getMessages();
+        for (Message message1 : message) {
+            this.setMessages(message1);
+        }
     }
     
 }
