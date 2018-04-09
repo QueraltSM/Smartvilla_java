@@ -7,9 +7,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class PythonConnection {
-    private Socket clientSocket;
-    private DataOutputStream outToServer;
-    private BufferedReader inFromServer;
+    private final Socket clientSocket;
+    private final DataOutputStream outToServer;
+    private final BufferedReader inFromServer;
     private final int serverPort;
 
     public PythonConnection(int serverPort) throws IOException {

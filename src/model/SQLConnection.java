@@ -24,4 +24,15 @@ public class SQLConnection {
         }
     }
     
+    public void setUser(Person person) throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("INSERT INTO USERS (email, password, name, surname, last_visit) " + "VALUES ('" + person.getEmail() + "', '"
+        + person.getPassword() + "', '" + person.getUsername() + "', '" + person.getSurname() + "', '" + person.getLastVisit() + "');");
+    }
+    
+    public void deleteAll() throws SQLException {
+        Statement statement = connection.createStatement();
+        statement.executeUpdate("DELETE FROM USERS");
+    }
+    
 }

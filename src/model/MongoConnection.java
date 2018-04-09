@@ -3,19 +3,17 @@ package model;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-
-import java.util.List;
-import java.util.Set;
+import java.util.Iterator;
 import org.bson.Document;
 
 public class MongoConnection {
-    public MongoClientURI mongoURI;
-    public MongoClient mongoClient;
-    public MongoDatabase db;
-    public MongoCollection coll;
+    private final MongoClientURI mongoURI;
+    private final MongoClient mongoClient;
+    private final MongoDatabase db;
+    private final MongoCollection coll;
     
     public MongoConnection() {
         mongoURI = new MongoClientURI("mongodb://admin:admin@ds233238.mlab.com:33238/recognition");
@@ -24,11 +22,24 @@ public class MongoConnection {
         coll = db.getCollection("users");
     }
     
-    public void getUser() {
-        FindIterable<Document> myDoc = coll.find();
-        for (Document doc : myDoc) {
-            System.out.println("Username: " + doc.getString("name"));
+    public Person[] getUser() {
+        MongoCursor<Document> cursor = coll.find().iterator();
+        Person[] user = new Person[(int) coll.count()];
+        
+        System.out.println("length: " + user.length);
+        //Person user = new Person();
+        int i = 0;
+        while (cursor.hasNext()) {
+            Document doc = cursor.next();
+            //Iterator it = doc.keySet().iterator();
+            Person actualUser = new Person();
+            doc.keySet().forEach((key) -> {
+                actualUser.setPerson(key, doc.get(key));
+            });
+            user[i] = actualUser;
+            i++;
         }
+        return user;
     }
     
     public long getUserCount() {

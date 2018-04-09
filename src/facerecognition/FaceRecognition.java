@@ -1,55 +1,49 @@
 package facerecognition;
 
 import gnu.io.NoSuchPortException;
-import java.util.concurrent.TimeUnit;
-import model.ArduinoConnection;
 import model.MongoConnection;
 import model.SQLConnection;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import model.Person;
+import model.PythonConnection;
 
 public class FaceRecognition {
     public static void main(String[] args) throws InterruptedException, NoSuchPortException, IOException, ClassNotFoundException, SQLException {
         MongoConnection db = new MongoConnection();
-        db.getUser();
-        
+        PythonConnection python = new PythonConnection(10000);
         SQLConnection sqlDatabase = new SQLConnection();
-        sqlDatabase.getUsers();
+        Integer py = 0;
+        sqlDatabase.deleteAll();
         
-        new Thread(new ArduinoInterrupt()).start();
-    } 
-    
-    public static class ArduinoInterrupt implements Runnable {
-        @Override
-        public void run() {
-            ArduinoConnection connect = new ArduinoConnection();
-            connect.setPort("/dev/ttyACM0");
-            try {
-                connect.initializeConection();
-            } catch (NoSuchPortException ex) {
-                Logger.getLogger(FaceRecognition.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                TimeUnit.SECONDS.sleep(2);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(FaceRecognition.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            connect.sendData("start");
-            String response = "no";
-            while (response.equals("no")) {
-                response = connect.receiveData();
-            }
-            System.out.println(response);
-            System.out.println("Ya esta");
-            try {
-                connect.close();
-            } catch (IOException ex) {
-                Logger.getLogger(FaceRecognition.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
+        
+        Person[] user = db.getUser();
+        for (Person user1 : user) {
+            sqlDatabase.setUser(user1);
         }
         
-    }
+        //new Thread(new ArduinoInterrupt()).start();
+        while (true) {
+            try {
+                ExecutorService service = Executors.newFixedThreadPool(1);
+                Future<Integer> result = service.submit(new ArduinoThread());
+                if (result.get() == 1) {
+                    py = 1;
+                }
+                service.shutdown();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+            if (py == 1) {
+                python.send("start");
+                String res = python.receive();
+                System.out.println(res);
+            }
+            Thread.sleep(10000);
+        }
+    } 
 }
