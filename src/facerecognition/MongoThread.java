@@ -1,5 +1,6 @@
 package facerecognition;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import model.MongoConnection;
@@ -26,26 +27,36 @@ public class MongoThread implements Runnable {
     public void run() {
         while (true) {
             if (mongoConnection.getUserCount() != count) {
-                
                 try {
+                    if (mongoConnection.getUserCount() < count) { //A user has been deleted, so it has to be its photo
+                        sqlConnection.deletePhoto(mongoConnection.getUser());
+                    }
                     sqlConnection.updateUsers(mongoConnection);
+                    System.out.println("Users table has been updated");
                 } catch (SQLException e) {
                     System.out.println(e);
+                } catch (IOException ex) {
+                    System.out.println(ex);
                 }
-                
+                count = mongoConnection.getUserCount();
                 try {
+                    File directory = new File("/home/giovanni/Dropbox/Aplicaciones/SmartVilla/");
+                    int fileCount = directory.list().length;
+                    System.out.println("Número de ficheros " +  fileCount);
+                    while ((fileCount - 1) != count) {
+                        fileCount = directory.list().length;
+                    }
                     pythonConnection.send("update");
                 } catch (IOException e) {
                     System.out.println(e);   
                 }
-                
-                count = mongoConnection.getUserCount();
             }
             
             if (mongoConnection.getMessageCount() != messageCount) {
                 
                 try {
                     sqlConnection.updateMessages(mongoConnection);
+                    System.out.println("Messages table has been updated");
                 } catch (SQLException e) {
                     System.out.println(e);
                 }

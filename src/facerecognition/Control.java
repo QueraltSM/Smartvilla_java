@@ -12,10 +12,10 @@ import view.FaceFrame;
 
 public class Control {
 
-    private PythonConnection python;
-    private FaceFrame frame;
-    private MongoConnection mongo;
-    private SQLConnection sql;
+    private final PythonConnection python;
+    private final FaceFrame frame;
+    private final MongoConnection mongo;
+    private final SQLConnection sql;
     private String command;
 
     public Control(PythonConnection python, FaceFrame frame, MongoConnection mongo, SQLConnection sql) throws InterruptedException, IOException {
@@ -25,6 +25,10 @@ public class Control {
         this.sql = sql;
         this.command = "start";
         frame.setVisible(true);
+        
+        Runnable mongoThread = new MongoThread(mongo, sql, python);
+        new Thread(mongoThread).start();
+        
         while (true) {
             recognize();
         }

@@ -1,5 +1,9 @@
 package model;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -14,15 +18,15 @@ public class SQLConnection {
         connection = DriverManager.getConnection("jdbc:sqlite:/home/giovanni/Documentos/ITQ/users");
     }
     
-    /*public void getUsers() throws SQLException {
+    public ResultSet getUsers() throws SQLException {
         Statement statement = connection.createStatement();
         String query = "SELECT * FROM USERS";
         ResultSet rs = statement.executeQuery(query);
-        
-        while (rs.next()) {
+        return rs;
+        /*while (rs.next()) {
             System.out.println("SQL email = " + rs.getString(2));
-        }
-    }*/
+        }*/
+    }
     
     public void setUser(Person person) throws SQLException {
         Statement statement = connection.createStatement();
@@ -71,6 +75,25 @@ public class SQLConnection {
         }
         
         return rs;
+    }
+    
+    public void deletePhoto(Person[] users) throws SQLException, IOException {
+        ResultSet sqlUsers = this.getUsers();
+        boolean found;
+        while (sqlUsers.next()) {
+            found = false;
+            for (Person user : users) {
+                if (user.getEmail().equals(sqlUsers.getString("email"))) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                String stringPath = "/home/giovanni/Dropbox/Aplicaciones/SmartVilla/" + sqlUsers.getString("name") + " " + sqlUsers.getString("surname") + ".jpg";
+                System.out.println(stringPath);
+                Path path = Paths.get(stringPath);
+                Files.deleteIfExists(path);
+            }
+        }
     }
     
 }
