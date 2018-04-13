@@ -14,7 +14,7 @@ public class SQLConnection {
         connection = DriverManager.getConnection("jdbc:sqlite:/home/giovanni/Documentos/ITQ/users");
     }
     
-    public void getUsers() throws SQLException {
+    /*public void getUsers() throws SQLException {
         Statement statement = connection.createStatement();
         String query = "SELECT * FROM USERS";
         ResultSet rs = statement.executeQuery(query);
@@ -22,7 +22,7 @@ public class SQLConnection {
         while (rs.next()) {
             System.out.println("SQL email = " + rs.getString(2));
         }
-    }
+    }*/
     
     public void setUser(Person person) throws SQLException {
         Statement statement = connection.createStatement();
@@ -51,7 +51,7 @@ public class SQLConnection {
     
     public void deleteMessages() throws SQLException {
         Statement statement = connection.createStatement();
-        statement.executeUpdate("DELETE FROM USERS");
+        statement.executeUpdate("DELETE FROM MESSAGES");
     }
     
     public void updateMessages(MongoConnection db) throws SQLException {
@@ -60,6 +60,17 @@ public class SQLConnection {
         for (Message message1 : message) {
             this.setMessages(message1);
         }
+    }
+    
+    public ResultSet getUserMessages (String receiver) throws SQLException {
+        Statement statement = connection.createStatement();
+        ResultSet rs = statement.executeQuery("SELECT * FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
+        
+        while (rs.next()) {
+            System.out.println("Sender: " + rs.getString("sender") + "; Receiver: " + rs.getString("receiver") + "; Message: " + rs.getString("message"));
+        }
+        
+        return rs;
     }
     
 }

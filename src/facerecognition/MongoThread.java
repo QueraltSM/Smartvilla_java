@@ -19,6 +19,7 @@ public class MongoThread implements Runnable {
         this.sqlConnection = sqlConnection;
         this.pythonConnection = pythonConnection;
         this.count = 0;
+        this.messageCount = 0;
     }
     
     @Override
