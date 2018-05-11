@@ -1,6 +1,8 @@
 package facerecognition;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +20,7 @@ public class Control {
     private final SQLConnection sql;
     private String command;
 
-    public Control(PythonConnection python, FaceFrame frame, MongoConnection mongo, SQLConnection sql) throws InterruptedException, IOException {
+    public Control(PythonConnection python, FaceFrame frame, MongoConnection mongo, SQLConnection sql) throws InterruptedException, IOException, SQLException {
         this.python = python;
         this.frame = frame;
         this.mongo = mongo;
@@ -34,7 +36,7 @@ public class Control {
         }
     }
     
-    public void recognize() throws InterruptedException, IOException {
+    public void recognize() throws InterruptedException, IOException, SQLException {
     int py = 0;
     String res = "";
     try {
@@ -58,6 +60,9 @@ public class Control {
     if(!"NoOne".equals(res) && !"Unknown".equals(res)){
         frame.changeImage("/home/giovanni/Dropbox/Aplicaciones/SmartVilla/" + res + ".jpg");
         frame.changeTitle("Welcome " + res);
+        String[] result = sql.getUserMessages(res);
+        Runnable msgThread = new MsgThread(result, frame);
+        new Thread(msgThread).start();
         Thread.sleep(10000);
         frame.changeImage("restore");
         frame.changeTitle("Welcome to Smart Villa");

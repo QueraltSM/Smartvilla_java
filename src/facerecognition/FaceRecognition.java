@@ -18,4 +18,6 @@ public class FaceRecognition {
     public static void main(String[] args) throws InterruptedException, NoSuchPortException, IOException, ClassNotFoundException, SQLException {
         new Control(new PythonConnection(10000), new FaceFrame(), new MongoConnection(), new SQLConnection());
     }
+    
+    
 }

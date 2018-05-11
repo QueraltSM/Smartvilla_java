@@ -66,15 +66,23 @@ public class SQLConnection {
         }
     }
     
-    public ResultSet getUserMessages (String receiver) throws SQLException {
+    public String[] getUserMessages (String receiver) throws SQLException {
         Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT * FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
-        
-        while (rs.next()) {
-            System.out.println("Sender: " + rs.getString("sender") + "; Receiver: " + rs.getString("receiver") + "; Message: " + rs.getString("message"));
+        ResultSet count = statement.executeQuery("SELECT COUNT(*) FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
+        int length = 0;
+        if (count.next()) {
+            length = count.getInt(1);
         }
         
-        return rs;
+        ResultSet rs = statement.executeQuery("SELECT * FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
+        
+        String[] messages = new String[length];
+        int i = 0;
+        while (rs.next()) {
+            messages[i] = rs.getString("message");
+            i++;
+        }
+        return messages;
     }
     
     public void deletePhoto(Person[] users) throws SQLException, IOException {
