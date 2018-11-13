@@ -20,12 +20,8 @@ public class SQLConnection {
     
     public ResultSet getUsers() throws SQLException {
         Statement statement = connection.createStatement();
-        String query = "SELECT * FROM USERS";
-        ResultSet rs = statement.executeQuery(query);
+        ResultSet rs = statement.executeQuery("SELECT * FROM USERS");
         return rs;
-        /*while (rs.next()) {
-            System.out.println("SQL email = " + rs.getString(2));
-        }*/
     }
     
     public void setUser(Person person) throws SQLException {
@@ -36,8 +32,8 @@ public class SQLConnection {
     
     public void setMessages(Message message) throws SQLException {
         Statement statement = connection.createStatement();
-        statement.executeUpdate("INSERT INTO MESSAGES (sender, receiver, message) " + "VALUES ('" + message.getFrom() + "', '"
-        + message.getTo() + "', '" + message.getMessage() + "');");
+        statement.executeUpdate("INSERT INTO MESSAGES (sender, receiver, message) " + "VALUES ('" + message.getFrom() +
+                "', '" + message.getTo() + "', '" + message.getMessage() + "');");
     }
     
     public void deleteUsers() throws SQLException {
@@ -47,8 +43,7 @@ public class SQLConnection {
     
     public void updateUsers(MongoConnection db) throws SQLException {
         this.deleteUsers();
-        Person[] user = db.getUser();
-        for (Person user1 : user) {
+        for (Person user1 : db.getUser()) {
             this.setUser(user1);
         }
     }
@@ -60,22 +55,17 @@ public class SQLConnection {
     
     public void updateMessages(MongoConnection db) throws SQLException {
         this.deleteMessages();
-        Message[] message = db.getMessages();
-        for (Message message1 : message) {
+        for (Message message1 : db.getMessages()) {
             this.setMessages(message1);
         }
     }
     
     public String[] getUserMessages (String receiver) throws SQLException {
         Statement statement = connection.createStatement();
-        ResultSet count = statement.executeQuery("SELECT COUNT(*) FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
+        ResultSet count = statement.executeQuery("SELECT COUNT(*) FROM MESSAGES WHERE RECEIVER = " + receiver);
         int length = 0;
-        if (count.next()) {
-            length = count.getInt(1);
-        }
-        
-        ResultSet rs = statement.executeQuery("SELECT * FROM MESSAGES WHERE RECEIVER = '" + receiver + "';");
-        
+        if (count.next()) length = count.getInt(1);
+        ResultSet rs = statement.executeQuery("SELECT * FROM MESSAGES WHERE RECEIVER = "+ receiver);
         String[] messages = new String[length];
         int i = 0;
         while (rs.next()) {
@@ -90,18 +80,13 @@ public class SQLConnection {
         boolean found;
         while (sqlUsers.next()) {
             found = false;
-            for (Person user : users) {
-                if (user.getEmail().equals(sqlUsers.getString("email"))) {
-                    found = true;
-                }
-            }
+            for (Person user : users)
+                if (user.getEmail().equals(sqlUsers.getString("email"))) found = true;
             if (!found) {
-                String stringPath = "/home/giovanni/Dropbox/Aplicaciones/SmartVilla/" + sqlUsers.getString("name") + " " + sqlUsers.getString("surname") + ".jpg";
-                System.out.println(stringPath);
-                Path path = Paths.get(stringPath);
-                Files.deleteIfExists(path);
+                System.out.println("/home/giovanni/Dropbox/Aplicaciones/SmartVilla/" + sqlUsers.getString("name") +
+                        " " + sqlUsers.getString("surname") + ".jpg");
+                Files.deleteIfExists(Paths.get(stringPath));
             }
         }
     }
-    
 }
